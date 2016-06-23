@@ -10,7 +10,12 @@ else
   dpkg -i puppetlabs-release-trusty.deb
 fi
 
+apt-key update
 apt-get update
+
+# this is here because Puppet fails to instal rabbitmq-server
+# it has something to do with not passing "--force-yes" to apt-get
+apt-get -y --force-yes install rabbitmq-server
 apt-get -y install puppet
 apt-get -y install git
 apt-get -y install ruby-dev
@@ -22,15 +27,15 @@ rm -rf modules/
 LIBRARIAN_FILE=$( cat << EOF
 forge "http://forge.puppetlabs.com"
 
-mod "arioch/redis", "1.1.3"
-mod "sensu/sensu", "2.0.0"
+mod "arioch/redis"
+mod "sensu/sensu"
 mod "puppetlabs/stdlib"
 mod "puppetlabs/apt"
 mod "maestrodev/wget"
-mod "garethr/erlang", "0.3.0"
-mod "puppetlabs/rabbitmq", "5.3.1"
+mod "garethr/erlang"
+mod "puppetlabs/rabbitmq"
 mod "nanliu/staging"
-mod "yelp/uchiwa", "0.3.0"
+mod "yelp/uchiwa"
 
 EOF
 )
@@ -43,7 +48,8 @@ sed -i '/^templatedir/d' /etc/puppet/puppet.conf
 
 # generate sensu SSL certificates to the puppet manifest can use them
 cd /root
-wget http://sensuapp.org/docs/0.20/tools/ssl_certs.tar
-tar -xvf ssl_certs.tar
+wget http://sensuapp.org/docs/0.25/files/sensu_ssl_tool.tar
+tar -xvf sensu_ssl_tool.tar
+mv sensu_ssl_tool ssl_certs
 cd ssl_certs
 ./ssl_certs.sh generate
